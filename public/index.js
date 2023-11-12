@@ -1171,8 +1171,9 @@ function initFromParameters() {
   }
 
   // let width = 1280;
-  let width = 1280;
-  let height = 800;
+  // let height = 800; //avoid absolute position
+  let width = window.innerWidth*0.7;
+  let height = window.innerHeight*0.7;
   if (size) {
     const match = size.match(/([\d]+),([\d]+)/);
     width = parseInt(match[1], 10);
