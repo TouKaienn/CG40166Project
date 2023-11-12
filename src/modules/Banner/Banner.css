@@ -1,0 +1,11 @@
+.Banner {
+    position: fixed;
+}
+
+.Logo {
+    position: fixed;
+    left: 10px;
+    top: 10px;
+    width: auto;
+    height: 30px;
+}
