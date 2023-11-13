@@ -1,0 +1,1 @@
+python train_feature.py --config=configs/nerf_synthetic_feature.txt

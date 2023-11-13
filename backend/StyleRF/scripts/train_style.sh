@@ -1,0 +1,1 @@
+python train_style.py --config=configs/nerf_synthetic_style.txt
