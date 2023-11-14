@@ -113,6 +113,7 @@ def export_snerg_scene(output_directory, atlas, atlas_block_indices,
       training cameras).
   """
   # Slice the atlas into images.
+  print("exporting...")
   rgbs = []
   alphas = []
   for i in range(0, atlas.shape[2], 4):
@@ -189,6 +190,7 @@ def export_snerg_scene(output_directory, atlas, atlas_block_indices,
   # Now store the indirection grid.
   atlas_indices_path = '%s/atlas_indices.png' % output_tmp_directory
   if jax.host_id() == 0:
+    print("saving...")
     save_8bit_png((atlas_index_image, atlas_indices_path))
 
   # Make sure that all JAX hosts have reached this point in the code before we

@@ -97,6 +97,7 @@ def main(unused_argv):
   while True:
     state = checkpoints.restore_checkpoint(FLAGS.train_dir, state)
     step = int(state.optimizer.state.step)
+    print(step, last_step)
     if step <= last_step:
       continue
 
@@ -110,6 +111,7 @@ def main(unused_argv):
      viewdir_mlp_params) = model_utils.extract_snerg_mlps(
          state.optimizer.target, scene_params_init)
 
+    print("A1")
     # Render out the low-res grid used for culling.
     culling_grid_coordinates = baking.build_3d_grid(
         scene_params_init["min_xyz"], culling_params_init["_voxel_size"],
@@ -121,12 +123,13 @@ def main(unused_argv):
         culling_params_init["_voxel_size"], scene_params_init)
 
     # Early out in case the culling grid is completely empty.
-    if culling_grid_alpha.max() < culling_params_init["alpha_threshold"]:
-      if FLAGS.eval_once:
-        break
-      else:
-        continue
+    # if culling_grid_alpha.max() < culling_params_init["alpha_threshold"]:
+    #   if FLAGS.eval_once:
+    #     break
+    #   else:
+    #     continue
 
+    print("A2")
     # Using this grid, maximize resolution with a tight crop on the scene.
     (render_params, culling_params, atlas_params,
      scene_params) = culling.crop_alpha_grid(render_params_init,
@@ -166,6 +169,7 @@ def main(unused_argv):
     # Make the visibility grid more conservative by dilating it. We need to
     # temporarly cast to float32 here, as ndimage.maximum_filter doesn't work
     # with float16.
+    print("A3")
     atlas_grid_visibility = ndimage.maximum_filter(
         atlas_grid_visibility.astype(np.float32),
         culling_params["visibility_grid_dilation"]).astype(
@@ -190,6 +194,7 @@ def main(unused_argv):
     gc.collect()
 
     atlas_t_list = []
+    print(atlas.shape)
     for i in range(atlas.shape[2]):
       atlas_t_list.append(tf.convert_to_tensor(atlas[:, :, i, :]))
     del atlas
@@ -215,6 +220,7 @@ def main(unused_argv):
 
     # Ray march through the baked SNeRG scene to create training data for the
     # view-depdence MLP.
+    print("A4")
     (train_rgbs, _, train_directions,
      train_refs) = eval_and_refine.build_sharded_dataset_for_view_dependence(
          train_dataset, atlas_t, atlas_block_indices_t, atlas_params,
@@ -239,6 +245,7 @@ def main(unused_argv):
     # Now run the view-dependence on the ray marched output images to add
     # back view-depdenent effects. Note that we do this both before and after
     # refining the parameters.
+    print("A5")
     pre_refined_images = eval_and_refine.eval_dataset_and_unshard(
         viewdir_mlp_model, viewdir_mlp_params, test_rgbs, test_directions,
         test_dataset, scene_params)
@@ -260,6 +267,7 @@ def main(unused_argv):
     gc.collect()
 
     # Export the baked scene so we can view it in the web-viewer.
+    print("A6")
     export.export_snerg_scene(out_dir, atlas_t.numpy(),
                               atlas_block_indices_t.numpy(),
                               refined_viewdir_mlp_params, render_params,
@@ -275,6 +283,7 @@ def main(unused_argv):
     # Finally, export the rendered test set images and update tensorboard.
 
     # Parallelize the image export over JAX hosts to speed this up.
+    print("A7")
     renders_and_paths = []
     paths = []
     for i in range(test_dataset.camtoworlds.shape[0]):
@@ -287,6 +296,7 @@ def main(unused_argv):
             render_and_path[1]),
         renders_and_paths)
 
+    print("A8")
     if (not FLAGS.eval_once) and (jax.host_id() == 0):
       summary_writer.image("baked_raw_color", pre_refined_images[0], step)
       summary_writer.image("baked_refined_color", post_refined_images[0], step)

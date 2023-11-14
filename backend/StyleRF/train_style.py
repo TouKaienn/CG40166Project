@@ -181,7 +181,7 @@ def reconstruction(args):
     for iteration in pbar:
 
         # get style_img, this style_img has NOT been normalized according to the pretrained VGGmodel
-        style_img = Image.open("/home/yuxuankuang/Style4VisRF/StyleRF/data/ref_case/vortex_tf/r_0000.png").convert('RGB')
+        style_img = Image.open(args.style_img).convert('RGB')
         style_img = torchvision.transforms.ToTensor()(style_img).unsqueeze(0).to(device)
 
         # randomly sample patch_size*patch_size patch from given frame
