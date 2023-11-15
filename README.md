@@ -54,7 +54,14 @@ Now you can check your page on the url output in terminal. After you compile the
 
 ## 2 Backend
 
-Prerequisites: in `StyleRF/data`:
+### 2.1 Prerequisites
+
+Follow [StyleRF](https://github.com/Kunhao-Liu/StyleRF) and [SNeRG](https://github.com/google-research/google-research/tree/master/snerg) to set up the virtual environment.
+
+### 2.2 Data File Structure
+
+In `backend/StyleRF/data`:
+
 ```
 ├── nerf_synthetic
 │   ├── lego
@@ -72,8 +79,13 @@ Prerequisites: in `StyleRF/data`:
     └── sunflower.jpeg
 ```
 
+### 2.3 Stylization and Baking
+
+e.g.
 
 ```bash
 cd backend
 CUDA_VISIBLE_DEVICES=1 bash run.sh lego starry.jpeg
 ```
+
+And you will find baked NeRF in `backend/tmp/lego/starry/baked/png/`.
