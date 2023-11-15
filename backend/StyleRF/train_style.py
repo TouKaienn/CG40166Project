@@ -94,14 +94,14 @@ def render_test(args):
 
     if args.render_train:
         train_dataset = dataset(args.datadir, split='train', downsample=args.downsample_train, is_stack=True)
-        os.makedirs(f'{logfolder}/{args.expname}/imgs_train_all/{style_name}', exist_ok=True)
-        evaluation_feature(train_dataset,tensorf, args, renderer, args.chunk_size, f'{logfolder}/{args.expname}/imgs_train_all/{style_name}',
+        os.makedirs(f'{logfolder}/{args.expname}/{style_name}/train/', exist_ok=True)
+        evaluation_feature(train_dataset,tensorf, args, renderer, args.chunk_size, f'{logfolder}/{args.expname}/{style_name}/train/',
                                 N_vis=-1, N_samples=-1, white_bg = train_dataset.white_bg, ndc_ray=ndc_ray, style_img=style_img, device=device)
     
     if args.render_test:
         test_dataset = dataset(args.datadir, split='test', downsample=args.downsample_train, is_stack=True)
-        os.makedirs(f'{logfolder}/{args.expname}/imgs_test_all/{style_name}', exist_ok=True)
-        evaluation_feature(test_dataset,tensorf, args, renderer, args.chunk_size, f'{logfolder}/{args.expname}/imgs_test_all/{style_name}',
+        os.makedirs(f'{logfolder}/{args.expname}/{style_name}/test/', exist_ok=True)
+        evaluation_feature(test_dataset,tensorf, args, renderer, args.chunk_size, f'{logfolder}/{args.expname}/{style_name}/test/',
                                 N_vis=-1, N_samples=-1, white_bg = test_dataset.white_bg, ndc_ray=ndc_ray, style_img=style_img, device=device)
         
     if args.render_path:
@@ -291,6 +291,7 @@ if __name__ == '__main__':
 
     args = config_parser()
     print(args)
+    print('===============>', args.style_img)
 
     if args.render_only:
         render_test(args)

@@ -1,7 +1,4 @@
 dataset_name = blender
-datadir = /home/yuxuankuang/Style4VisRF/StyleRF/data/nerf_synthetic/vortex/
-ckpt = ./log_feature/vortex/vortex.th
-expname = vortex
 basedir = ./log_style
 
 patch_size = 256

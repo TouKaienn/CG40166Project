@@ -116,8 +116,8 @@ def evaluation_feature(test_dataset, tensorf, args, renderer, chunk_size=2048, s
             # rgb_map = np.concatenate((recon_rgb, gt_rgb), axis=1)
             rgb_maps.append(recon_rgb)
             vis_feature_maps.append(vis_feature_map)
-            imageio.imwrite(f'{savePath}/{prtx}{idx:03d}.png', recon_rgb)
-            imageio.imwrite(f'{savePath}/feature/feature_{idx:03d}.png', vis_feature_map)
+            imageio.imwrite(f'{savePath}/{prtx}r_{idx}.png', recon_rgb)
+            imageio.imwrite(f'{savePath}/feature/feature_r_{idx}.png', vis_feature_map)
 
     imageio.mimwrite(f'{savePath}/{prtx}video.mp4', np.stack(rgb_maps), fps=30, quality=8)
     imageio.mimwrite(f'{savePath}/feature/feature_video.mp4', np.stack(vis_feature_maps), fps=30, quality=8)
