@@ -21,3 +21,16 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+.eggs
+build
+svox2.egg-info
+__pycache__/
+ckpt_svox2/
+vortex_refnpr/
+log/
+log_feature/
+log_style/
+.idea/
+.DS_Store
+tmp/
