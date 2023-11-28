@@ -16,38 +16,38 @@
  * The a global dictionary containing scene parameters.
  * @type {?Object}
  */
-let gSceneParams = null;
+var gSceneParams = null;
 
 /**
  * The timestamp of the last frame to be rendered, used to track performance.
  * @type {number}
  */
-let gLastFrame = window.performance.now();
+var gLastFrame = window.performance.now();
 
 /**
  * The near plane used for rendering. Increasing this value somewhat speeds up
  * rendering, but this is most useful to show cross sections of the scene.
  * @type {number}
  */
-let gNearPlane = 0.33;
+var gNearPlane = 0.33;
 
 /**
  * This scene renders the baked NeRF reconstruction using ray marching.
  * @type {?THREE.Scene}
  */
-let gRayMarchScene = null;
+var gRayMarchScene = null;
 
 /**
  * Progress counters for loading RGBA textures.
  * @type {number}
  */
-let gLoadedRGBATextures = 0;
+var gLoadedRGBATextures = 0;
 
 /**
  * Progress counters for loading feature textures.
  * @type {number}
  */
-let gLoadedFeatureTextures = 0;
+var gLoadedFeatureTextures = 0;
 
 /**
  * Different display modes for debugging rendering.
@@ -69,38 +69,38 @@ const DisplayModeType = {
 };
 
 /**  @type {!DisplayModeType}  */
-let gDisplayMode = DisplayModeType.DISPLAY_NORMAL;
+var gDisplayMode = DisplayModeType.DISPLAY_NORMAL;
 
 /**
  * Number of textures to load.
  * @type {number}
  */
-let gNumTextures = 0;
+var gNumTextures = 0;
 
 /**
  * The THREE.js renderer object we use.
  * @type {?THREE.WebGLRenderer}
  */
-let gRenderer = null;
+var gRenderer = null;
 
 /**
  * The perspective camera we use to view the scene.
  * @type {?THREE.PerspectiveCamera}
  */
-let gCamera = null;
+var gCamera = null;
 
 /**
  * We control the perspective camera above using OrbitControls.
  * @type {?THREE.OrbitControls}
  */
-let gOrbitControls = null;
+var gOrbitControls = null;
 
 /**
  * An orthographic camera used to kick off ray marching with a
  * full-screen render pass.
  * @type {?THREE.OrthographicCamera}
  */
-let gBlitCamera = null;
+var gBlitCamera = null;
 
 /**
  * Creates a float32 texture from a Float32Array of data.
@@ -110,7 +110,7 @@ let gBlitCamera = null;
  * @return {!THREE.DataTexture}
  */
 function createFloatTextureFromData(width, height, data) {
-  let texture = new THREE.DataTexture(data, width, height, THREE.RedFormat);
+  var texture = new THREE.DataTexture(data, width, height, THREE.RedFormat);
   texture.magFilter = THREE.NearestFilter;
   texture.minFilter = THREE.NearestFilter;
   texture.type = THREE.FloatType;
@@ -522,18 +522,18 @@ const rayMarchFragmentShaderBody = `
  */
 function createNetworkWeightTexture(network_weights) {
   if (!network_weights) {
-    let weightsData = new Float32Array([0]);
+    var weightsData = new Float32Array([0]);
     return createFloatTextureFromData(
       1, 1, weightsData);
   }
-  let width = network_weights.length;
-  let height = network_weights[0].length;
+  var width = network_weights.length;
+  var height = network_weights[0].length;
 
-  let weightsData = new Float32Array(width * height);
-  for (let co = 0; co < height; co++) {
-    for (let ci = 0; ci < width; ci++) {
-      let index = co * width + ci;
-      let weight = network_weights[ci][co];
+  var weightsData = new Float32Array(width * height);
+  for (var co = 0; co < height; co++) {
+    for (var ci = 0; ci < width; ci++) {
+      var index = co * width + ci;
+      var weight = network_weights[ci][co];
       weightsData[index] = weight;
     }
   }
@@ -552,12 +552,12 @@ function createNetworkWeightTexture(network_weights) {
  * @return {string}
  */
 function createViewDependenceFunctions(scene_params) {
-  let network_weights = scene_params;
+  var network_weights = scene_params;
 
-  let width = network_weights['0_bias'].length;
-  let biasListZero = '';
-  for (let i = 0; i < width; i++) {
-    let bias = network_weights['0_bias'][i];
+  var width = network_weights['0_bias'].length;
+  var biasListZero = '';
+  for (var i = 0; i < width; i++) {
+    var bias = network_weights['0_bias'][i];
     biasListZero += Number(bias).toFixed(7);
     if (i + 1 < width) {
       biasListZero += ', ';
@@ -565,9 +565,9 @@ function createViewDependenceFunctions(scene_params) {
   }
 
   width = network_weights['1_bias'].length;
-  let biasListOne = '';
-  for (let i = 0; i < width; i++) {
-    let bias = network_weights['1_bias'][i];
+  var biasListOne = '';
+  for (var i = 0; i < width; i++) {
+    var bias = network_weights['1_bias'][i];
     biasListOne += Number(bias).toFixed(7);
     if (i + 1 < width) {
       biasListOne += ', ';
@@ -575,22 +575,22 @@ function createViewDependenceFunctions(scene_params) {
   }
 
   width = network_weights['2_bias'].length;
-  let biasListTwo = '';
-  for (let i = 0; i < width; i++) {
-    let bias = network_weights['2_bias'][i];
+  var biasListTwo = '';
+  for (var i = 0; i < width; i++) {
+    var bias = network_weights['2_bias'][i];
     biasListTwo += Number(bias).toFixed(7);
     if (i + 1 < width) {
       biasListTwo += ', ';
     }
   }
 
-  let channelsZero = network_weights['0_weights'].length;
-  let channelsOne = network_weights['0_bias'].length;
-  let channelsTwo = network_weights['1_bias'].length;
-  let channelsThree = network_weights['2_bias'].length;
-  let posEncScales = 4;
+  var channelsZero = network_weights['0_weights'].length;
+  var channelsOne = network_weights['0_bias'].length;
+  var channelsTwo = network_weights['1_bias'].length;
+  var channelsThree = network_weights['2_bias'].length;
+  var posEncScales = 4;
 
-  let fragmentShaderSource = viewDependenceNetworkShaderFunctions.replace(
+  var fragmentShaderSource = viewDependenceNetworkShaderFunctions.replace(
       new RegExp('NUM_CHANNELS_ZERO', 'g'), channelsZero);
   fragmentShaderSource = fragmentShaderSource.replace(
       new RegExp('NUM_POSENC_SCALES', 'g'), posEncScales.toString());
@@ -641,10 +641,10 @@ function createRayMarchMaterial(
     scene_params, alphaVolumeTexture, rgbVolumeTexture, featureVolumeTexture,
     atlasIndexTexture, minPosition, gridWidth, gridHeight, gridDepth, blockSize,
     voxelSize, atlasWidth, atlasHeight, atlasDepth) {
-  let weightsTexZero = null;
-  let weightsTexOne = null;
-  let weightsTexTwo = null;
-  let fragmentShaderSource = rayMarchFragmentShaderHeader;
+  var weightsTexZero = null;
+  var weightsTexOne = null;
+  var weightsTexTwo = null;
+  var fragmentShaderSource = rayMarchFragmentShaderHeader;
   if (scene_params['diffuse']) {
     fragmentShaderSource += dummyViewDependenceShaderFunctions;
     weightsTexZero = createNetworkWeightTexture(null);
@@ -659,16 +659,16 @@ function createRayMarchMaterial(
   fragmentShaderSource += rayMarchFragmentShaderBody;
 
   // Now pass all the 3D textures as uniforms to the shader.
-  let worldspace_R_opengl = new THREE.Matrix3();
-  let M_dict = scene_params['worldspace_T_opengl'];
+  var worldspace_R_opengl = new THREE.Matrix3();
+  var M_dict = scene_params['worldspace_T_opengl'];
   worldspace_R_opengl['set'](
       M_dict[0][0], M_dict[0][1], M_dict[0][2],
       M_dict[1][0], M_dict[1][1], M_dict[1][2],
       M_dict[2][0], M_dict[2][1], M_dict[2][2]);
 
-  let ndc_f = 755.644059435;
-  let ndc_w = 1006.0;
-  let ndc_h = 756.0;
+  var ndc_f = 755.644059435;
+  var ndc_w = 1006.0;
+  var ndc_h = 756.0;
   if ("input_focal" in scene_params) {
     ndc_f = parseFloat(scene_params['input_focal']);
     ndc_w = parseFloat(scene_params['input_width']);
@@ -789,10 +789,10 @@ function addHandlers() {
  * Hides the Loading prompt.
  */
 function hideLoading() {
-  let loading = document.getElementById('Loading');
+  var loading = document.getElementById('Loading');
   loading.style.display = 'none';
 
-  let loadingContainer = document.getElementById('loading-container');
+  var loadingContainer = document.getElementById('loading-container');
   loadingContainer.style.display = 'none';
 }
 
@@ -800,8 +800,8 @@ function hideLoading() {
  * Updates the loading progress HTML elements.
  */
 function updateLoadingProgress() {
-  let texturergbprogress = document.getElementById('texturergbprogress');
-  let texturefeaturesprogress =
+  var texturergbprogress = document.getElementById('texturergbprogress');
+  var texturefeaturesprogress =
       document.getElementById('texturefeaturesprogress');
 
   const textureString = gNumTextures > 0 ? gNumTextures : '?';
@@ -823,9 +823,9 @@ function loadPNG(rgbaUrl) {
                       }).then(response => {
     return response.arrayBuffer();
   }).then(buffer => {
-    let data = new Uint8Array(buffer);
-    let pngDecoder = new PNG(data);
-    let pixels = pngDecoder.decodePixels();
+    var data = new Uint8Array(buffer);
+    var pngDecoder = new PNG(data);
+    var pixels = pngDecoder.decodePixels();
     return pixels;
   });
   rgbaPromise.catch(error => {
@@ -852,17 +852,17 @@ function loadPNG(rgbaUrl) {
  * @param {?function()} on_update A function to be called whenever an image has
  *     been loaded.
  *
- * @return {!Promise} A promise that completes when all RGBA images have been
+ * @return {!Promise} A promise that compvares when all RGBA images have been
  *     uploaded.
  */
 function loadSplitVolumeTexturePNG(
     texture_alpha, texture_rgb, url, num_slices, volume_width, volume_height,
     volume_depth, on_update) {
   const slice_depth = 4;
-  let uploadPromises = [];
-  for (let i = 0; i < num_slices; i++) {
-    let rgbaUrl = url + '_' + digits(i, 3) + '.png';
-    let rgbaPromise = loadPNG(rgbaUrl);
+  var uploadPromises = [];
+  for (var i = 0; i < num_slices; i++) {
+    var rgbaUrl = url + '_' + digits(i, 3) + '.png';
+    var rgbaPromise = loadPNG(rgbaUrl);
     rgbaPromise = rgbaPromise.then(data => {
       on_update();
       return data;
@@ -871,15 +871,15 @@ function loadSplitVolumeTexturePNG(
     uploadPromises[i] = new Promise(function(resolve, reject) {
       Promise.all([rgbaPromise, i])
           .then(values => {
-            let rgbaPixels = values[0];
-            let i = values[1];
+            var rgbaPixels = values[0];
+            var i = values[1];
 
-            let rgbPixels = new Uint8Array(
+            var rgbPixels = new Uint8Array(
                 volume_width * volume_height * slice_depth * 3);
-            let alphaPixels = new Uint8Array(
+            var alphaPixels = new Uint8Array(
                 volume_width * volume_height * slice_depth * 1);
 
-            for (let j = 0; j < volume_width * volume_height * slice_depth;
+            for (var j = 0; j < volume_width * volume_height * slice_depth;
                  j++) {
               rgbPixels[j * 3 + 0] = rgbaPixels[j * 4 + 0];
               rgbPixels[j * 3 + 1] = rgbaPixels[j * 4 + 1];
@@ -894,15 +894,15 @@ function loadSplitVolumeTexturePNG(
                 gRenderer['properties'].get(texture_rgb);
             const alphaTextureProperties =
                 gRenderer['properties'].get(texture_alpha);
-            let gl = gRenderer.getContext();
+            var gl = gRenderer.getContext();
 
-            let oldTexture = gl.getParameter(gl.TEXTURE_BINDING_3D);
+            var oldTexture = gl.getParameter(gl.TEXTURE_BINDING_3D);
             gl.bindTexture(
                 gl.TEXTURE_3D, rgbTextureProperties['__webglTexture']);
             // Upload row-by-row to work around bug with Intel + Mac OSX.
             // See https://crbug.com/654258.
-            for (let z = 0; z < slice_depth; ++z) {
-              for (let y = 0; y < volume_height; ++y) {
+            for (var z = 0; z < slice_depth; ++z) {
+              for (var y = 0; y < volume_height; ++y) {
               gl.texSubImage3D(
                   gl.TEXTURE_3D, 0, 0, y, z + i * slice_depth,
                   volume_width, 1, 1, gl.RGB, gl.UNSIGNED_BYTE,
@@ -914,8 +914,8 @@ function loadSplitVolumeTexturePNG(
                 gl.TEXTURE_3D, alphaTextureProperties['__webglTexture']);
             // Upload row-by-row to work around bug with Intel + Mac OSX.
             // See https://crbug.com/654258.
-            for (let z = 0; z < slice_depth; ++z) {
-              for (let y = 0; y < volume_height; ++y) {
+            for (var z = 0; z < slice_depth; ++z) {
+              for (var y = 0; y < volume_height; ++y) {
               gl.texSubImage3D(
                   gl.TEXTURE_3D, 0, 0, y, z + i * slice_depth,
                   volume_width, 1, 1, gl.RED, gl.UNSIGNED_BYTE,
@@ -952,17 +952,17 @@ function loadSplitVolumeTexturePNG(
  * @param {?function()} on_update A function to be called whenever an image has
  *     been loaded.
  *
- * @return {!Promise} A promise that completes when all RGBA images have been
+ * @return {!Promise} A promise that compvares when all RGBA images have been
  *     uploaded.
  */
 function loadVolumeTexturePNG(
     texture, url, num_slices, volume_width, volume_height, volume_depth,
     on_update) {
   const slice_depth = 4;
-  let uploadPromises = [];
-  for (let i = 0; i < num_slices; i++) {
-    let rgbaUrl = url + '_' + digits(i, 3) + '.png';
-    let rgbaPromise = loadPNG(rgbaUrl);
+  var uploadPromises = [];
+  for (var i = 0; i < num_slices; i++) {
+    var rgbaUrl = url + '_' + digits(i, 3) + '.png';
+    var rgbaPromise = loadPNG(rgbaUrl);
     rgbaPromise = rgbaPromise.then(data => {
       on_update();
       return data;
@@ -971,22 +971,22 @@ function loadVolumeTexturePNG(
     uploadPromises[i] = new Promise(function(resolve, reject) {
       Promise.all([rgbaPromise, i])
           .then(values => {
-            let rgbaImage = values[0];
-            let i = values[1];
+            var rgbaImage = values[0];
+            var i = values[1];
 
             // We unfortunately have to touch THREE.js internals to get access
             // to the texture handle and gl.texSubImage3D. Using dictionary
             // notation to make this code robust to minifcation.
             const textureProperties = gRenderer['properties'].get(texture);
-            let gl = gRenderer.getContext();
+            var gl = gRenderer.getContext();
 
-            let oldTexture = gl.getParameter(gl.TEXTURE_BINDING_3D);
-            let textureHandle = textureProperties['__webglTexture'];
+            var oldTexture = gl.getParameter(gl.TEXTURE_BINDING_3D);
+            var textureHandle = textureProperties['__webglTexture'];
             gl.bindTexture(gl.TEXTURE_3D, textureHandle);
             // Upload row-by-row to work around bug with Intel + Mac OSX.
             // See https://crbug.com/654258.
-            for (let z = 0; z < slice_depth; ++z) {
-              for (let y = 0; y < volume_height; ++y) {
+            for (var z = 0; z < slice_depth; ++z) {
+              for (var y = 0; y < volume_height; ++y) {
               gl.texSubImage3D(
                   gl.TEXTURE_3D, 0, 0, y, z + i * slice_depth,
                   volume_width, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE,
@@ -1023,9 +1023,9 @@ function loadScene(dirUrl, width, height) {
   updateLoadingProgress();
 
   // Loads scene parameters (voxel grid size, NDC/no-NDC, view-dependence MLP).
-  let sceneParamsUrl = dirUrl + '/' +
+  var sceneParamsUrl = dirUrl + '/' +
       'scene_params.json';
-  let sceneParamsPromise = fetch(sceneParamsUrl, {
+  var sceneParamsPromise = fetch(sceneParamsUrl, {
                              method: 'GET',
                              mode: 'same-origin',
                            }).then(response => {
@@ -1040,17 +1040,17 @@ function loadScene(dirUrl, width, height) {
 
   // Load the indirection grid.
   const imageLoader = new THREE.ImageLoader();
-  let atlasIndexUrl = dirUrl + '/' + 'atlas_indices.png';
+  var atlasIndexUrl = dirUrl + '/' + 'atlas_indices.png';
   const atlasIndexPromise = new Promise(function(resolve, reject) {
     imageLoader.load(atlasIndexUrl, atlasIndexImage => {
       resolve(atlasIndexImage);
     }, undefined, () => reject(atlasIndexUrl));
   });
 
-  let initializedPromise = Promise.all([sceneParamsPromise, atlasIndexPromise]);
+  var initializedPromise = Promise.all([sceneParamsPromise, atlasIndexPromise]);
   initializedPromise.then(values => {
-    let parsed = values[0];
-    let atlasIndexImage = values[1];
+    var parsed = values[0];
+    var atlasIndexImage = values[1];
 
     // Start rendering ASAP, forcing THREE.js to upload the textures.
     requestAnimationFrame(render);
@@ -1067,7 +1067,7 @@ function loadScene(dirUrl, width, height) {
     gNumTextures = gSceneParams['num_slices'];
 
     // Create empty 3D textures for the loaders to incrementally fill with data.
-    let rgbVolumeTexture = new THREE.DataTexture3D(
+    var rgbVolumeTexture = new THREE.DataTexture3D(
         null, gSceneParams['atlas_width'], gSceneParams['atlas_height'],
         gSceneParams['atlas_depth']);
     rgbVolumeTexture.format = THREE.RGBFormat;
@@ -1078,7 +1078,7 @@ function loadScene(dirUrl, width, height) {
         rgbVolumeTexture.wrapR = THREE.ClampToEdgeWrapping;
     rgbVolumeTexture.type = THREE.UnsignedByteType;
 
-    let alphaVolumeTexture = new THREE.DataTexture3D(
+    var alphaVolumeTexture = new THREE.DataTexture3D(
         null, gSceneParams['atlas_width'], gSceneParams['atlas_height'],
         gSceneParams['atlas_depth']);
     alphaVolumeTexture.format = THREE.RedFormat;
@@ -1089,7 +1089,7 @@ function loadScene(dirUrl, width, height) {
         alphaVolumeTexture.wrapR = THREE.ClampToEdgeWrapping;
     alphaVolumeTexture.type = THREE.UnsignedByteType;
 
-    let featureVolumeTexture = null;
+    var featureVolumeTexture = null;
     if (!gSceneParams['diffuse']) {
       featureVolumeTexture = new THREE.DataTexture3D(
           null, gSceneParams['atlas_width'], gSceneParams['atlas_height'],
@@ -1103,7 +1103,7 @@ function loadScene(dirUrl, width, height) {
       featureVolumeTexture.type = THREE.UnsignedByteType;
     }
 
-    let atlasIndexTexture = new THREE.DataTexture3D(
+    var atlasIndexTexture = new THREE.DataTexture3D(
         atlasIndexImage,
         Math.ceil(gSceneParams['grid_width'] / gSceneParams['block_size']),
         Math.ceil(gSceneParams['grid_height'] / gSceneParams['block_size']),
@@ -1116,8 +1116,8 @@ function loadScene(dirUrl, width, height) {
         atlasIndexTexture.wrapR = THREE.ClampToEdgeWrapping;
     atlasIndexTexture.type = THREE.UnsignedByteType;
 
-    let fullScreenPlane = new THREE.PlaneBufferGeometry(width, height);
-    let rayMarchMaterial = createRayMarchMaterial(
+    var fullScreenPlane = new THREE.PlaneBufferGeometry(width, height);
+    var rayMarchMaterial = createRayMarchMaterial(
         gSceneParams, alphaVolumeTexture, rgbVolumeTexture,
         featureVolumeTexture, atlasIndexTexture,
         new THREE.Vector3(
@@ -1128,7 +1128,7 @@ function loadScene(dirUrl, width, height) {
         gSceneParams['voxel_size'], gSceneParams['atlas_width'],
         gSceneParams['atlas_height'], gSceneParams['atlas_depth']);
 
-    let fullScreenPlaneMesh = new THREE.Mesh(fullScreenPlane, rayMarchMaterial);
+    var fullScreenPlaneMesh = new THREE.Mesh(fullScreenPlane, rayMarchMaterial);
     fullScreenPlaneMesh.position.z = -100;
     fullScreenPlaneMesh.frustumCulled = false;
 
@@ -1155,8 +1155,9 @@ function loadScene(dirUrl, width, height) {
  */
 function initFromParameters() {
   const params = new URL(window.location.href).searchParams;
-  // const dirUrl = params.get('dir');
-  const dirUrl = './data/lego'
+  const dirUrl = params.get('dir');
+  // const dirUrl = './data/lego'
+  // const dirUrl = document.getElementById('dirUrl').getAttribute('value');
   const size = params.get('s');
 
   const usageString =
@@ -1170,10 +1171,10 @@ function initFromParameters() {
     return;
   }
 
-  // let width = 1280;
-  // let height = 800; //avoid absolute position
-  let width = window.innerWidth*0.7;
-  let height = window.innerHeight*0.7;
+  // var width = 1280;
+  // var height = 800; //avoid absolute position
+  var width = window.innerWidth*1.0;
+  var height = window.innerHeight*1.0;
   if (size) {
     const match = size.match(/([\d]+),([\d]+)/);
     width = parseInt(match[1], 10);
@@ -1198,13 +1199,13 @@ function initFromParameters() {
   viewSpace.textContent = '';
   viewSpace.appendChild(view);
 
-  let canvas = document.createElement('canvas');
+  var canvas = document.createElement('canvas');
   view.appendChild(canvas);
-  console.log(view.offsetHeight, view.offsetWidth)
+  // console.log(view.offsetHeight, view.offsetWidth)
 
   // Set up a high performance WebGL context, making sure that anti-aliasing is
   // truned off.
-  let gl = canvas.getContext('webgl2');
+  var gl = canvas.getContext('webgl2');
   gRenderer = new THREE.WebGLRenderer({
     canvas: canvas,
     context: gl,
@@ -1235,23 +1236,23 @@ function initFromParameters() {
  * @return {boolean}
  */
 function isRendererUnsupported() {
-  let loading = document.getElementById('Loading');
+  var loading = document.getElementById('Loading');
 
-  let gl = document.getElementsByTagName("canvas")[0].getContext('webgl2');
+  var gl = document.getElementsByTagName("canvas")[0].getContext('webgl2');
   if (!gl) {
     loading.innerHTML = "Error: WebGL2 context not found. Is your machine" +
     " equipped with a discrete GPU?";
     return true;
   }
 
-  let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+  var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
   if (!debugInfo) {
     loading.innerHTML = "Error: Could not fetch renderer info. Is your" +
     " machine equipped with a discrete GPU?";
     return true;
   }
 
-  let renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+  var renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
   if (!renderer || renderer.search("SwiftShader") >= 0 ||
       (renderer.search("ANGLE") >= 0 &&
        renderer.search("Intel") >= 0 &&
@@ -1278,7 +1279,7 @@ function loadOnFirstFrame() {
   // Also early out if the renderer is not supported.
   if (isRendererUnsupported()) {
     gSceneParams['loadingTextures'] = true;
-    let loadingContainer = document.getElementById('loading-container');
+    var loadingContainer = document.getElementById('loading-container');
     loadingContainer.style.display = 'none';
     return;
   }
@@ -1314,7 +1315,7 @@ function loadOnFirstFrame() {
       gRayMarchScene.children[0].material.uniforms['mapAlpha']['value'];
   const rgbVolumeTexture =
       gRayMarchScene.children[0].material.uniforms['mapColor']['value'];
-  let rgbVolumeTexturePromise = loadSplitVolumeTexturePNG(
+  var rgbVolumeTexturePromise = loadSplitVolumeTexturePNG(
       alphaVolumeTexture, rgbVolumeTexture, gSceneParams['dirUrl'] + '/rgba',
       gNumTextures, gSceneParams['atlas_width'], gSceneParams['atlas_height'],
       gSceneParams['atlas_depth'], function() {
@@ -1322,7 +1323,7 @@ function loadOnFirstFrame() {
         updateLoadingProgress();
       });
 
-  let featureVolumeTexturePromise = null;
+  var featureVolumeTexturePromise = null;
   if (!gSceneParams['diffuse']) {
     const featureVolumeTexture =
       gRayMarchScene.children[0].material.uniforms['mapFeatures']['value'];
@@ -1335,7 +1336,7 @@ function loadOnFirstFrame() {
       });
   }
   
-  let allTexturesPromise =
+  var allTexturesPromise =
       Promise.all([rgbVolumeTexturePromise, featureVolumeTexturePromise]);
   allTexturesPromise.catch(errors => {
     console.error(
@@ -1349,8 +1350,8 @@ function loadOnFirstFrame() {
   allTexturesPromise.then(texture => {
     const alphaTextureProperties =
         gRenderer['properties'].get(alphaVolumeTexture);
-    let gl = gRenderer.getContext();
-    let oldTexture = gl.getParameter(gl.TEXTURE_BINDING_3D);
+    var gl = gRenderer.getContext();
+    var oldTexture = gl.getParameter(gl.TEXTURE_BINDING_3D);
     gl.bindTexture(gl.TEXTURE_3D, alphaTextureProperties['__webglTexture']);
     gl.generateMipmap(gl.TEXTURE_3D);
     gl.bindTexture(gl.TEXTURE_3D, oldTexture);
@@ -1367,19 +1368,19 @@ function loadOnFirstFrame() {
  * Updates the frame rate counter using exponential fall-off smoothing.
  */
 function updateFPSCounter() {
-  let currentFrame = window.performance.now();
-  let milliseconds = currentFrame - gLastFrame;
-  let oldMilliseconds = 1000 /
+  var currentFrame = window.performance.now();
+  var milliseconds = currentFrame - gLastFrame;
+  var oldMilliseconds = 1000 /
       (parseFloat(document.getElementById('fpsdisplay').innerHTML) || 1.0);
 
   // Prevent the FPS from getting stuck by ignoring frame times over 2 seconds.
   if (oldMilliseconds > 2000 || oldMilliseconds < 0) {
     oldMilliseconds = milliseconds;
   }
-  let smoothMilliseconds = oldMilliseconds * (0.75) + milliseconds * 0.25;
-  let smoothFps = 1000 / smoothMilliseconds;
+  var smoothMilliseconds = oldMilliseconds * (0.75) + milliseconds * 0.25;
+  var smoothFps = 1000 / smoothMilliseconds;
   gLastFrame = currentFrame;
-  console.log(document.getElementById('fpsdisplay').innerHTML);
+  // console.log(document.getElementById('fpsdisplay').innerHTML);
   document.getElementById('fpsdisplay').innerHTML = smoothFps.toFixed(1);
 }
 
@@ -1395,10 +1396,10 @@ function render(t) {
   gRenderer.setRenderTarget(null);
   gRenderer.clear();
 
-  let world_T_camera = gCamera.matrixWorld;
-  let camera_T_clip = new THREE.Matrix4();
+  var world_T_camera = gCamera.matrixWorld;
+  var camera_T_clip = new THREE.Matrix4();
   camera_T_clip.getInverse(gCamera.projectionMatrix);
-  let world_T_clip = new THREE.Matrix4();
+  var world_T_clip = new THREE.Matrix4();
   world_T_clip.multiplyMatrices(world_T_camera, camera_T_clip);
 
   gRayMarchScene.children[0].material.uniforms['world_T_clip']['value'] =
@@ -1423,8 +1424,6 @@ function start() {
   addHandlers();
 }
 
-// export const start = () => {
-//   initFromParameters();
-//   addHandlers();
-// };
+
 start();
+
