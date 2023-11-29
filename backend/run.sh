@@ -13,6 +13,7 @@ bash scripts/test_style.sh $model $style_file
 cd ..
 cp StyleRF/data/nerf_synthetic/$model/transforms_train.json StyleRF/log_style/$model/$model/$style_name/transforms_train.json
 cp StyleRF/data/nerf_synthetic/$model/transforms_test.json StyleRF/log_style/$model/$model/$style_name/transforms_test.json
+python -m snerg.postprocess --model $model --style_name $style_name
 # Get NeRF
 python -m snerg.train \
     --data_dir=StyleRF/log_style/$model/$model/$style_name \
