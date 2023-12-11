@@ -46,6 +46,8 @@ export default function SidePannel() {
     }
     else {
       base_src += './data/'+content+'_'+style
+      var Preview = document.getElementById('Preview')
+      Preview.setAttribute('src','./data/styles/'+style+'.jpg')
     }
     viewspace.setAttribute('src',base_src)
     // document.getElementById('dirUrl').setAttribute('value','./data/lego_sunflower')
@@ -92,6 +94,15 @@ export default function SidePannel() {
     </FormControl>
 
     <Button variant="contained" startIcon={<FormatPaintIcon></FormatPaintIcon>} onClick={handleClick} sx={{width:`${75}%`,height:`${5}%`,position:'absolute',top:180,left:`${12.5}%`}}>Blend/Generate</Button>
+
+    <Box
+    id="Preview"
+    component="img"
+    sx={{width:`${90}%`,position:'absolute',top:300,left:`${5}%`}}
+    alt="Style Preview"
+    src="./data/styles/None.jpg"
+    />
+
     </Box>
   );
 }

@@ -20,7 +20,7 @@ python -m snerg.train \
     --train_dir=tmp/$model/$style_name \
     --config configs/blender
 # Baking
-python -m snerg.bake \
+python -m snerg.bake \s
     --data_dir=StyleRF/log_style/$model/$model/$style_name \
     --train_dir=tmp/$model/$style_name \
     --config configs/blender
